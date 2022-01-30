@@ -5,7 +5,6 @@ import (
 	"github.com/DisgoOrg/disgo/core/events"
 	"github.com/DisgoOrg/disgo/discord"
 	"github.com/DisgoOrg/snowflake"
-	"github.com/google/go-cmp/cmp"
 )
 
 // gatewayHandlerGuildStickersUpdate handles discord.GatewayEventTypeGuildStickersUpdate
@@ -46,7 +45,7 @@ func (h *gatewayHandlerGuildStickersUpdate) HandleGatewayEvent(bot *core.Bot, se
 		sticker, ok := stickerCache[current.ID]
 		if ok {
 			delete(oldStickers, current.ID)
-			if !cmp.Equal(sticker, current) {
+			if !compareSticker(sticker.Sticker, current) {
 				updatedStickers[current.ID] = bot.EntityBuilder.CreateSticker(current, core.CacheStrategyYes)
 			}
 		} else {
@@ -88,4 +87,66 @@ func (h *gatewayHandlerGuildStickersUpdate) HandleGatewayEvent(bot *core.Bot, se
 		})
 	}
 
+}
+
+func compareSticker(a discord.Sticker, b discord.Sticker) bool {
+	return a.ID == b.ID &&
+		compareSnowflake(a.PackID, b.PackID) &&
+		a.Name == b.Name &&
+		a.Description == b.Description &&
+		a.Tags == b.Tags &&
+		a.Type == b.Type &&
+		a.FormatType == b.FormatType &&
+		compareBool(a.Available, b.Available) &&
+		compareSnowflake(a.GuildID, b.GuildID) &&
+		compareUser(a.User, b.User) &&
+		compareInt(a.SortValue, b.SortValue)
+}
+
+func compareSnowflake(s1 *snowflake.Snowflake, s2 *snowflake.Snowflake) bool {
+	if s1 == nil && s2 == nil {
+		return true
+	}
+
+	if s1 == nil || s2 == nil {
+		return false
+	}
+
+	return *s1 == *s2
+}
+
+func compareInt(i1 *int, i2 *int) bool {
+	if i1 == nil && i2 == nil {
+		return true
+	}
+
+	if i1 == nil || i2 == nil {
+		return false
+	}
+
+	return *i1 == *i2
+}
+
+func compareBool(b1 *bool, b2 *bool) bool {
+	if b1 == nil && b2 == nil {
+		return true
+	}
+
+	if b1 == nil || b2 == nil {
+		return false
+	}
+
+	return *b1 == *b2
+}
+
+func compareString(s1 *string, s2 *string) bool {
+	if s1 == nil && s2 == nil {
+		return true
+	}
+
+	if s1 == nil || s2 == nil {
+		return false
+	}
+
+	return *s1 == *s2
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/DisgoOrg/disgo/core/events"
 	"github.com/DisgoOrg/disgo/discord"
 	"github.com/DisgoOrg/snowflake"
-	"github.com/google/go-cmp/cmp"
 )
 
 // gatewayHandlerGuildEmojisUpdate handles discord.GatewayEventTypeGuildEmojisUpdate
@@ -46,7 +45,7 @@ func (h *gatewayHandlerGuildEmojisUpdate) HandleGatewayEvent(bot *core.Bot, sequ
 		emoji, ok := emojiCache[current.ID]
 		if ok {
 			delete(oldEmojis, current.ID)
-			if !cmp.Equal(emoji, current) {
+			if !compareEmoji(emoji.Emoji, current) {
 				updatedEmojis[current.ID] = bot.EntityBuilder.CreateEmoji(payload.GuildID, current, core.CacheStrategyYes)
 			}
 		} else {
@@ -88,4 +87,38 @@ func (h *gatewayHandlerGuildEmojisUpdate) HandleGatewayEvent(bot *core.Bot, sequ
 		})
 	}
 
+}
+
+func compareEmoji(emoji discord.Emoji, emoji2 discord.Emoji) bool {
+	return emoji.ID == emoji2.ID &&
+		emoji.Name == emoji2.Name &&
+		compareSnowflakeSlice(emoji.Roles, emoji2.Roles) &&
+		compareUser(emoji.Creator, emoji2.Creator) &&
+		emoji.RequireColons == emoji2.RequireColons &&
+		emoji.Managed == emoji2.Managed &&
+		emoji.Animated == emoji2.Animated &&
+		emoji.Available == emoji2.Available &&
+		emoji.GuildID == emoji2.GuildID
+}
+
+func compareUser(creator *discord.User, creator2 *discord.User) bool {
+	if creator == nil && creator2 == nil {
+		return true
+	}
+	if creator == nil || creator2 == nil {
+		return false
+	}
+	return creator.ID == creator2.ID
+}
+
+func compareSnowflakeSlice(slice1 []snowflake.Snowflake, slice2 []snowflake.Snowflake) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+	for i := range slice1 {
+		if slice1[i] != slice2[i] {
+			return false
+		}
+	}
+	return true
 }

@@ -155,14 +155,14 @@ func (b *EmbedBuilder) SetTimestamp(time time.Time) *EmbedBuilder {
 
 // AddField adds a field to the EmbedBuilder by name and value
 func (b *EmbedBuilder) AddField(name string, value string, inline bool) *EmbedBuilder {
-	b.Fields = append(b.Fields, EmbedField{Name: name, Value: value, Inline: &inline})
+	b.Fields = append(b.Fields, EmbedField{Name: name, Value: value, Inline: inline})
 	return b
 }
 
 // SetField sets a field to the EmbedBuilder by name and value
 func (b *EmbedBuilder) SetField(i int, name string, value string, inline bool) *EmbedBuilder {
 	if len(b.Fields) > i {
-		b.Fields[i] = EmbedField{Name: name, Value: value, Inline: &inline}
+		b.Fields[i] = EmbedField{Name: name, Value: value, Inline: inline}
 	}
 	return b
 }
